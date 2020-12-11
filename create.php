@@ -1,45 +1,40 @@
 <?php
-// Include config file
+// memanggil config.php
 require_once "config.php";
  
-// Define variables and initialize with empty values
+// mendefinisikan variabel dan inisialisasi dengan nilai kosong
 $name = $address = $salary = $department = $position = $tunjangan = "";
 $name_err = $address_err = $salary_err = $department_err =$position_err = $tunjangan_err = "";
  
-// Processing form data when form is submitted
-if(isset($_POST["id"]) && !empty($_POST["id"])){
-    // Get hidden input value
-    $id = $_POST["id"];
-    
-    // Validate name
+// memproses form ketika ditekan tombol submit
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    // validasi field nama
     $input_name = trim($_POST["name"]);
     if(empty($input_name)){
-        $name_err = "Please enter a name.";
+        $name_err = "Mohon masukkan sebuah nama.";
     } elseif(!filter_var($input_name, FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^[a-zA-Z\s]+$/")))){
-        $name_err = "Please enter a valid name.";
+        $name_err = "Mohon masukkan nama yang valid.";
     } else{
         $name = $input_name;
     }
     
-    // Validate address address
+    // validasi field alamat
     $input_address = trim($_POST["address"]);
     if(empty($input_address)){
-        $address_err = "Please enter an address.";     
+        $address_err = "Mohon masukkan sebuah alamat.";     
     } else{
         $address = $input_address;
     }
     
-    // Validate salary
+    // validasi field gaji
     $input_salary = trim($_POST["salary"]);
     if(empty($input_salary)){
-        $salary_err = "Please enter the salary amount.";     
+        $salary_err = "Mohon masukkan jumlah gaji.";     
     } elseif(!ctype_digit($input_salary)){
-        $salary_err = "Please enter a positive integer value.";
+        $salary_err = "Mohon masukkan bilangan bulat positif saja.";
     } else{
         $salary = $input_salary;
     }
-   
-    
     $input_department = trim($_POST["department"]);
     if(empty($input_department)){
         $department_err = "Please enter the department amount.";   
@@ -61,91 +56,44 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
         $tunjangan = $input_tunjangan;
     }
     
-    // Check input errors before inserting in database
-    if(empty($name_err) && empty($address_err) && empty($salary_err) &&  empty($department_err) &&  empty($position_err) &&  empty($tunjangan_err)){
-        // Prepare an update statement
-        $sql = "UPDATE employees SET name=?, address=?, salary=?, department=?, position=?, tunjangan=?  WHERE id=?";
-         
-        if($stmt = mysqli_prepare($link, $sql)){
-            // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "ssssssi", $param_name, $param_address, $param_salary, $param_department, $param_position, $param_tunjangan, $param_id);
-            
-            // Set parameters
-            $param_name = $name;
-            $param_address = $address;
-            $param_salary = $salary;
-            $param_department = $department;
-            $param_position = $position;
-            $param_tunjangan =$tunjangan;
-            $param_id = $id;
-            
-            // Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-                // Records updated successfully. Redirect to landing page
-                header("location: index.php");
-                exit();
-            } else{
-                echo "Something went wrong. Please try again later.";
-            }
-        }
-         
-        // Close statement
-        mysqli_stmt_close($stmt);
-    }
-    
-    // Close connection
-    mysqli_close($link);
-} else{
-    // Check existence of id parameter before processing further
-    if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
-        // Get URL parameter
-        $id =  trim($_GET["id"]);
-        
-        // Prepare a select statement
-        $sql = "SELECT * FROM employees WHERE id = ?";
-        if($stmt = mysqli_prepare($link, $sql)){
-            // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "i", $param_id);
-            
-            // Set parameters
-            $param_id = $id;
-            
-            // Attempt to execute the prepared statement
-            if(mysqli_stmt_execute($stmt)){
-                $result = mysqli_stmt_get_result($stmt);
-    
-                if(mysqli_num_rows($result) == 1){
-                    /* Fetch result row as an associative array. Since the result set contains only one row, we don't need to use while loop */
-                    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-                    
-                    // Retrieve individual field value
-                    $name = $row["name"];
-                    $address = $row["address"];
-                    $salary = $row["salary"];
-                    $department = $row["department"];
-                    $position = $row["position"];
-                    $tunjangan = $row["tunjangan"];
-                } else{
-                    // URL doesn't contain valid id. Redirect to error page
-                    header("location: error.php");
-                    exit();
-                }
+    // Cek input error sebelum memasukkan ke database
+
+        if(empty($name_err) && empty($address_err) && empty($salary_err) &&  empty($department_err) &&  empty($position_err) &&  empty($tunjangan_err)){
+            // Prepare an update statement
+            $sql = "INSERT INTO employees (name, address, salary, department, position, tunjangan) VALUES (?, ?, ?, ?, ?, ?)";
+                      
+            if($stmt = mysqli_prepare($link, $sql)){
+                // Bind variables to the prepared statement as parameters
+                mysqli_stmt_bind_param($stmt, "ssssss", $param_name, $param_address, $param_salary, $param_department, $param_position, $param_tunjangan);
                 
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
+                // Set parameters
+                $param_name = $name;
+                $param_address = $address;
+                $param_salary = $salary;
+                $param_department = $department;
+                $param_position = $position;
+                $param_tunjangan =$tunjangan;
+                
+                // Attempt to execute the prepared statement
+                if(mysqli_stmt_execute($stmt)){
+                    // Records updated successfully. Redirect to landing page
+                    header("location: index.php");
+                    exit();
+                } else{
+                    echo "Something went wrong. Please try again later.";
+                
             }
+             
+            // Close statement
+            mysqli_stmt_close($stmt);
         }
-        
-        // Close statement
+         
+        // Menutup statemen
         mysqli_stmt_close($stmt);
-        
-        // Close connection
-        mysqli_close($link);
-    }  else{
-        // URL doesn't contain id parameter. Redirect to error page
-        header("location: error.php");
-        exit();
     }
+    
+    // menutup config ke database
+    mysqli_close($link);
 }
 ?>
  
@@ -153,7 +101,8 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Update Record</title>
+    <title>Membuat Data Baru</title>
+    <!-- link untuk memasukkan bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
     <style type="text/css">
         .wrapper{
@@ -168,9 +117,9 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
             <div class="row">
                 <div class="col-md-12">
                     <div class="page-header">
-                        <h2>Update Data Pekerja</h2>
+                        <h2>Tambah Data</h2>
                     </div>
-                    <p>Silakan edit nilai yang ada dan tekan submit untuk melakukan update.</p>
+                    <p>Mohon isi form ini dan submit untuk menambah data employee ke database.</p>
                     <form action="<?php echo htmlspecialchars(basename($_SERVER['REQUEST_URI'])); ?>" method="post">
                         <div class="form-group <?php echo (!empty($name_err)) ? 'has-error' : ''; ?>">
                             <label>Name</label>
@@ -202,7 +151,6 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
                             <input type="text" name="tunjangan" class="form-control" value="<?php echo $tunjangan; ?>">
                             <span class="help-block"><?php echo $tunjangan_err;?></span>
                         </div>
-                        <input type="hidden" name="id" value="<?php echo $id; ?>"/>
                         <input type="submit" class="btn btn-primary" value="Submit">
                         <a href="index.php" class="btn btn-default">Cancel</a>
                     </form>

@@ -3,10 +3,6 @@
 session_start();
  
 // Check if the user is logged in, if not then redirect him to login page
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login.php");
-    exit;
-}
 
 ?>
 
@@ -21,7 +17,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>ADMIN</title>
+    <title>USER TABLES</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -55,9 +51,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                     <ul class="navbar-nav ml-auto">
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="logout.php" id="userDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="login.php" id="userDropdown" role="button"
                                 >
-                              Logout
+                              Login
                             </a>
                             
                             
@@ -88,7 +84,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                                                 echo "<th>Department</th>";
                                                 echo "<th>Position</th>";
                                                 echo "<th>Tunjangan</th>";
-                                                echo "<th>Action</th>";
                                             echo "</tr>";
                                         echo "</thead>";
                                         echo "<tbody>";
@@ -103,7 +98,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                                                 echo "<td>" . $row['tunjangan'] . "</td>";
                                                 echo "<td>";
                                                 
-                                                    echo "<a href='read.php?id=". $row['id'] ."' title='View Record' data-toggle='tooltip'><span class='btn btn-primary'>Read More</span></a>";
                                                     
                                                 echo "</td>";
                                                 
@@ -113,7 +107,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                                         echo "</tbody>";                            
                                     echo "</table>";
                                     echo "<td>";    
-                                    echo "<a href='create.php?id=". $row['id'] ."' title='View Record' data-toggle='tooltip'><span class='btn btn-success'>Tambah Data</span></a>";
 
                                     mysqli_free_result($result);
                                 } 
